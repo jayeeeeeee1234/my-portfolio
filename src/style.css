@@ -11,3 +11,23 @@ body,
 body {
   @apply bg-white text-slate-900 antialiased;
 }
+
+/* 抽屉打开时 ≥768px 强制左右布局，避免 Tailwind 动态类未生效 */
+@media (min-width: 768px) {
+  .main-with-drawer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 2rem;
+  }
+  .main-with-drawer .main-content-col {
+    flex: 1 1 0%;
+    min-width: 0;
+  }
+  .main-with-drawer .drawer-col {
+    flex: 0 0 360px;
+    width: 360px;
+    min-width: 360px;
+    max-width: 360px;
+  }
+}
