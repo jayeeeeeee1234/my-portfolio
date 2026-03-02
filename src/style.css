@@ -132,7 +132,27 @@ body,
 body {
   font-family: 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-weight: 400;
+  cursor: none;
   @apply bg-white text-slate-900 antialiased;
+}
+
+button,
+a,
+[role='button'] {
+  cursor: none;
+}
+
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  background: #ffffff;
+  mix-blend-mode: difference;
+  border-radius: 2px;
+  z-index: 50;
 }
 
 /* 抽屉打开时 ≥768px 强制左右布局，避免 Tailwind 动态类未生效 */

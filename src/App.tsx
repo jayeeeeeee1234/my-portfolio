@@ -523,6 +523,8 @@ export function App() {
   const [chatbotOpen, setChatbotOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
+  const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
+  const [cursorVisible, setCursorVisible] = useState(true)
 
   const rootClassName = `min-h-screen bg-white text-slate-900${
     chatbotOpen ? ' overflow-hidden' : ''
@@ -539,6 +541,29 @@ export function App() {
     window.addEventListener('resize', update)
     return () => window.removeEventListener('resize', update)
   }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleMove = (event: MouseEvent) => {
+      setCursorPos({ x: event.clientX, y: event.clientY })
+      if (!cursorVisible) {
+        setCursorVisible(true)
+      }
+    }
+
+    const handleLeave = () => {
+      setCursorVisible(false)
+    }
+
+    window.addEventListener('mousemove', handleMove)
+    window.addEventListener('mouseleave', handleLeave)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMove)
+      window.removeEventListener('mouseleave', handleLeave)
+    }
+  }, [cursorVisible])
 
   return (
     <div className={rootClassName}>
@@ -707,6 +732,12 @@ export function App() {
           )}
         </AnimatePresence>
       </div>
+      {cursorVisible && (
+        <div
+          className="custom-cursor"
+          style={{ transform: `translate3d(${cursorPos.x - 10}px, ${cursorPos.y - 10}px, 0)` }}
+        />
+      )}
     </div>
   )
 }
