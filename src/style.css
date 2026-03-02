@@ -2,6 +2,127 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 自带字体：Lay Grotesk & Mazius & Geist Mono & Tiempos
+   实际文件名：
+   public/fonts/lay-grotesk/
+     - LayGrotesk-Trial-Regular.(otf|ttf)
+     - LayGrotesk-Trial-Medium.(otf|ttf)
+     - LayGrotesk-Trial-Semibold.(otf|ttf)
+     - LayGrotesk-Trial-Bold.(otf|ttf)
+     - LayGrotesk-Trial-Black.(otf|ttf)
+
+   public/fonts/mazius/
+     - MaziusDisplay-Regular.woff2
+     - MaziusDisplay-Bold.woff2
+     - MaziusDisplay-Extraitalic.woff2
+     - MaziusDisplay-ExtraltalicBold.woff2
+
+   public/fonts/Geist_Mono/
+     - GeistMono-VariableFont_wght.ttf
+
+   public/fonts/Test Tiempos Collection/Test Tiempos Text/
+     - TestTiemposText-Regular.otf
+     - TestTiemposText-RegularItalic.otf
+*/
+
+@font-face {
+  font-family: 'Lay Grotesk';
+  src:
+    url('/fonts/lay-grotesk/LayGrotesk-Trial-Regular.otf') format('opentype'),
+    url('/fonts/lay-grotesk/LayGrotesk-Trial-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lay Grotesk';
+  src:
+    url('/fonts/lay-grotesk/LayGrotesk-Trial-Medium.otf') format('opentype'),
+    url('/fonts/lay-grotesk/LayGrotesk-Trial-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lay Grotesk';
+  src:
+    url('/fonts/lay-grotesk/LayGrotesk-Trial-Semibold.otf') format('opentype'),
+    url('/fonts/lay-grotesk/LayGrotesk-Trial-Semibold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lay Grotesk';
+  src:
+    url('/fonts/lay-grotesk/LayGrotesk-Trial-Bold.otf') format('opentype'),
+    url('/fonts/lay-grotesk/LayGrotesk-Trial-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lay Grotesk';
+  src:
+    url('/fonts/lay-grotesk/LayGrotesk-Trial-Black.otf') format('opentype'),
+    url('/fonts/lay-grotesk/LayGrotesk-Trial-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'mazius';
+  src: url('/fonts/mazius/MaziusDisplay-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'mazius';
+  src: url('/fonts/mazius/MaziusDisplay-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'mazius';
+  src: url('/fonts/mazius/MaziusDisplay-Extraitalic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/Geist_Mono/GeistMono-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tiempos';
+  src: url('/fonts/Test Tiempos Collection/Test Tiempos Text/TestTiemposText-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tiempos';
+  src: url('/fonts/Test Tiempos Collection/Test Tiempos Text/TestTiemposText-RegularItalic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
 html,
 body,
 #app {
@@ -9,6 +130,8 @@ body,
 }
 
 body {
+  font-family: 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-weight: 400;
   @apply bg-white text-slate-900 antialiased;
 }
 
@@ -30,4 +153,28 @@ body {
     min-width: 360px;
     max-width: 360px;
   }
+}
+
+/* ≥1440px 时，hero 区域改为左右布局；以下尺寸保持上下布局 */
+@media (min-width: 1440px) {
+  .hero-row {
+    flex-direction: row;
+  }
+}
+
+/* Hero 标题字体：整体 Tiempos，强调词保持 Tiempos */
+.hero-row h1 {
+  font-family: 'Tiempos', 'mazius', 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+.hero-row h1 span.italic {
+  font-family: 'Tiempos', 'mazius', 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+.project-title {
+  font-family: 'mazius', 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+.nav-mono {
+  font-family: 'Geist Mono', 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }

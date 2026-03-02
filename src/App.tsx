@@ -1,20 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import type React from 'react'
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import './style.css'
 
 const companies = [
-  { year: '2025', name: 'Bloomberg', role: 'Software Engineering Intern' },
-  { year: '2025', name: '1Password', role: 'Product Design Intern' },
-  { year: '2024', name: 'Royal Bank of Canada', role: 'Software Engineering Intern' },
-  { year: '2023', name: 'Onova', role: 'Product Design + Engineering Intern' },
+  { year: '2024', name: 'Shanghai Artificial Intelligence Research Institute', role: 'Product Designer' },
+  { year: '2024', name: 'Knowhow Consulting', role: 'Freelance User Researcher' },
+  { year: '2023', name: 'Bank of China', role: 'User Experience Designer' },
+  { year: '2022', name: 'Accenture Song', role: 'Service Designer Intern' },
 ]
 
 const navItems = [
-  { label: 'Work', active: true },
-  { label: 'Fun', active: false },
-  { label: 'About', active: false },
-  { label: 'Resume', active: false },
+  { label: 'WORK', active: true },
+  { label: 'FUN', active: false },
+  { label: 'ABOUT', active: false },
+  { label: 'RESUME', active: false },
 ]
 
 // 简历上下文：仅供 LLM 在回答中使用，不要改动含义，只做了排版和轻微纠错
@@ -522,10 +522,23 @@ function ChatbotPanel({ onClose }: ChatbotPanelProps) {
 export function App() {
   const [chatbotOpen, setChatbotOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
 
   const rootClassName = `min-h-screen bg-white text-slate-900${
     chatbotOpen ? ' overflow-hidden' : ''
   }`
+
+  useEffect(() => {
+    const update = () => {
+      if (typeof window !== 'undefined') {
+        setIsDesktop(window.innerWidth >= 768)
+      }
+    }
+
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
 
   return (
     <div className={rootClassName}>
@@ -537,15 +550,15 @@ export function App() {
         <div className={chatbotOpen ? 'main-content-col min-w-0 flex-1 md:h-screen md:overflow-y-auto' : ''}>
           <div className="mx-auto w-full max-w-[1800px] px-4 md:px-8">
             <header className="border-b border-slate-100">
-              <div className="flex items-center justify-between py-4 md:py-5">
-                <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">
-                  <span className="text-slate-900">YOUR</span>
-                  <span>NAME</span>
+              <div className="flex items-center justify-between py-4 font-light md:py-5">
+                <div className="flex items-center gap-2 text-[14px] font-normal uppercase tracking-[0.14em] text-slate-400 nav-mono">
+                  <span className="text-slate-900 tracking-normal">JIAYI</span>
+                  <span className="tracking-normal">ZHU</span>
                   <span className="hidden h-3 w-px bg-slate-200 md:block" />
-                  <span className="hidden md:inline">Product Designer + Engineer</span>
+                  <span className="hidden md:inline tracking-normal">Product Designer + Engineer</span>
                 </div>
                 <div className="flex items-center gap-3 md:gap-6">
-                  <nav className="hidden md:flex md:items-center md:gap-8 text-[11px] font-medium uppercase tracking-[0.16em]">
+                  <nav className="hidden md:flex md:items-center md:gap-8 text-[14px] font-normal uppercase tracking-normal nav-mono">
                     {navItems.map((item) => (
                       <button
                         key={item.label}
@@ -555,14 +568,34 @@ export function App() {
                       </button>
                     ))}
                   </nav>
+                  {/* Mobile chatbot button: icon + text */}
                   <button
                     onClick={() => setChatbotOpen((prev) => !prev)}
-                    className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-slate-500 hover:text-slate-700"
+                    className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[14px] font-normal uppercase tracking-[0.14em] text-slate-500 hover:text-slate-700 md:hidden nav-mono"
                   >
                     <span className="flex h-4 w-4 items-center justify-center rounded-full bg-slate-900 text-[9px] text-slate-50">
                       ?
                     </span>
-                    <span className="hidden sm:inline">Chatbot</span>
+                    <span>+1LLM</span>
+                  </button>
+                  {/* Desktop chatbot button: closed = icon + label, open = icon-only orange */}
+                  <button
+                    onClick={() => setChatbotOpen((prev) => !prev)}
+                    className={`hidden md:inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] nav-mono ${
+                      chatbotOpen
+                        ? 'bg-orange-500 text-white hover:bg-orange-600'
+                        : 'bg-white text-slate-500 hover:text-slate-700'
+                    }`}
+                    aria-pressed={chatbotOpen}
+                  >
+                    <span
+                      className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] ${
+                        chatbotOpen ? 'bg-white text-orange-500' : 'bg-slate-900 text-slate-50'
+                      }`}
+                    >
+                      ?
+                    </span>
+                    {!chatbotOpen && <span className="text-[14px] font-normal tracking-normal">+1LLM</span>}
                   </button>
                   <button
                     type="button"
@@ -583,7 +616,7 @@ export function App() {
               </div>
               {menuOpen && (
                 <div className="border-t border-slate-100 py-4 md:hidden">
-                  <nav className="flex flex-col gap-1 text-[11px] font-medium uppercase tracking-[0.16em]">
+                  <nav className="flex flex-col gap-1 text-[11px] font-medium uppercase tracking-[0.16em] nav-mono">
                     {navItems.map((item) => (
                       <button
                         key={item.label}
@@ -599,15 +632,29 @@ export function App() {
             </header>
 
             <main className="pb-24 pt-12 md:pt-20">
-              <div className="flex flex-col gap-12 md:gap-16">
-                <section className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between md:gap-16">
-                  <div className="max-w-xl">
-                    <h1 className="text-[28px] leading-tight tracking-tight text-slate-900 md:text-[40px]">
-                      I&apos;m Your Name, a product designer who <span className="italic">engineers.</span>
+              <div className="flex flex-col gap-6">
+                <section className="flex flex-col gap-8 pt-16 hero-row md:items-start md:justify-start md:gap-16">
+                  <div className="max-w-xl md:max-w-none md:flex-1">
+                    <h1 className="text-[28px] leading-tight tracking-normal text-slate-900 md:text-[48px] xl:text-[52px]">
+                      I&apos;m Jiayi, a product designer who <span className="italic">engineers.</span>
                     </h1>
                   </div>
-                  <div className="text-[13px] text-slate-400">
-                    <div className="flex gap-8 md:gap-16">
+                  <div className="text-[15px] text-slate-400 md:flex-1">
+                    {/* <1200px（这里用接近的 xl 断点）采用「年份 + 公司 + 职位」纵向结构 */}
+                    <div className="space-y-4 font-light xl:hidden">
+                      {companies.map((c) => (
+                        <div key={c.year + c.name} className="flex gap-6">
+                          <div className="w-14 shrink-0 text-slate-400">{c.year}</div>
+                          <div>
+                            <div className="font-normal text-slate-900">{c.name}</div>
+                            <div className="text-slate-400">{c.role}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* ≥1200px 保持原来的三列布局 */}
+                    <div className="hidden gap-8 font-light tracking-normal md:gap-16 xl:flex">
                       <div className="space-y-1">
                         {companies.map((c) => (
                           <div key={c.year}>{c.year}</div>
@@ -618,7 +665,7 @@ export function App() {
                           <div key={c.year + c.name}>{c.name}</div>
                         ))}
                       </div>
-                      <div className="space-y-1 text-right">
+                      <div className="space-y-1 text-right text-[15px]">
                         {companies.map((c) => (
                           <div key={c.year + c.role}>{c.role}</div>
                         ))}
@@ -629,7 +676,7 @@ export function App() {
 
                 <section className="flex flex-col gap-6 pt-4 md:flex-row md:gap-10 md:pt-12">
                   <article className="flex flex-1 items-end rounded-[24px] bg-gradient-to-tr from-orange-400 via-rose-500 to-indigo-500 px-8 pb-6 pt-20 text-lg font-medium text-white shadow-[0_32px_80px_rgba(15,23,42,0.45)] md:px-10 md:pb-8 md:pt-24">
-                    <div>OpenAI x Hardware</div>
+                    <div className="project-title">OpenAI x Hardware</div>
                   </article>
                   <article className="flex flex-1 rounded-[24px] bg-slate-50 p-6 shadow-[0_24px_60px_rgba(148,163,184,0.35)] md:p-8">
                     <div className="h-32 w-full rounded-2xl bg-violet-100 md:h-40" />
@@ -640,26 +687,26 @@ export function App() {
           </div>
         </div>
 
-        {/* Desktop: inline right-side drawer that shrinks header + main together */}
-        {chatbotOpen && (
-          <aside
-            className="drawer-col hidden h-full min-h-[60vh] w-full shrink-0 grow-0 flex-col border-l border-slate-200 bg-white shadow-[-8px_0_32px_rgba(15,23,42,0.08)] md:flex md:h-screen md:overflow-y-auto md:w-[360px] md:min-w-[360px] md:max-w-[360px] md:grow-0 md:shrink-0"
-            aria-label="Chatbot"
-          >
-            <ChatbotPanel onClose={() => setChatbotOpen(false)} />
-          </aside>
-        )}
+        {/* Chatbot drawer: shared instance for desktop and mobile, with smooth open/close animation */}
+        <AnimatePresence>
+          {chatbotOpen && (
+            <motion.aside
+              initial={isDesktop ? { opacity: 0, x: 24 } : { opacity: 0, y: 24 }}
+              animate={isDesktop ? { opacity: 1, x: 0 } : { opacity: 1, y: 0 }}
+              exit={isDesktop ? { opacity: 0, x: 24 } : { opacity: 0, y: 24 }}
+              transition={{
+                type: 'tween',
+                duration: 0.24,
+                ease: [0.33, 0, 0.2, 1], // 缓进缓出，无弹簧
+              }}
+              className="drawer-col fixed inset-x-0 bottom-0 top-auto z-40 flex h-full w-full flex-col overflow-hidden bg-white shadow-[0_-16px_40px_rgba(15,23,42,0.18)] md:relative md:inset-auto md:z-auto md:h-screen md:w-[360px] md:min-w-[360px] md:max-w-[360px] md:grow-0 md:shrink-0 md:border-l md:border-slate-200 md:shadow-[-8px_0_32px_rgba(15,23,42,0.08)]"
+              aria-label="Chatbot"
+            >
+              <ChatbotPanel onClose={() => setChatbotOpen(false)} />
+            </motion.aside>
+          )}
+        </AnimatePresence>
       </div>
-
-      {/* Mobile: full-width bottom sheet overlay, above content */}
-      {chatbotOpen && (
-        <aside
-          className="fixed inset-x-0 bottom-0 top-auto z-40 flex h-full w-full flex-col overflow-hidden bg-white shadow-[0_-16px_40px_rgba(15,23,42,0.18)] md:hidden"
-          aria-label="Chatbot"
-        >
-          <ChatbotPanel onClose={() => setChatbotOpen(false)} />
-        </aside>
-      )}
     </div>
   )
 }
