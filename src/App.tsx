@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type React from 'react'
+import { motion } from 'motion/react'
 import './style.css'
 
 const companies = [
@@ -15,63 +17,502 @@ const navItems = [
   { label: 'Resume', active: false },
 ]
 
+// 简历上下文：仅供 LLM 在回答中使用，不要改动含义，只做了排版和轻微纠错
+const RESUME_CONTEXT = `
+You are the personal assistant for this portfolio site.
+Use ONLY the information in the resume below to answer questions about experience, projects and skills.
+If you are not sure, say you are not sure instead of inventing details.
+
+---
+To C | Web 端 · NanoSafari 科研平台
+产品设计师 · 2024.10 - 至今
+项目概括：
+- 负责产品的设计规范、设计组件库从 0 到 1 的搭建，确保设计语言的一致性、规范性及可扩展性。
+- 负责 Chatbot 以及 Knowledge Base 模块迭代与优化。
+- 主导 Chatbot 模块和 Knowledge Base 模块的高保真原型设计，参与产品需求的调研，基于用户研究和反馈，持续优化用户体验，提升交互效率。
+- 设计组件库搭建：从 0 开始搭建 UI 组件库，制定设计规范，与产品经理和开发团队紧密合作，确保平台设计一致性并加速开发迭代。
+
+---
+To B | Web 端 · IT 资产管理平台
+UI / UX 设计师 · 2023.10 - 2023.11
+项目概括：
+- 参与企业内部 IT 资产管理平台的改版设计，完成用户调研并负责首页、资产管理、系统管理、工程管理等共 27 个模块的交互设计、视觉规范及落地跟进。
+- 负责 IT 资产管理平台的首页重构。通过对首页进行信息架构和体验流程的优化，实现体验投诉工单减少 20%，简化操作流程，降低用户学习成本。
+- 通过对产品业务逻辑的梳理，重新设计系统管理流程和用户管理操作路径。新的用户管理流程降低了约 90% 的用户等待响应时间，大大提高了用户工作效率。
+
+---
+To C | Web & 移动端 · 全链路旅游产品服务
+产品 / 服务设计师 · 2022.07 - 2022.10
+项目概括：
+- 项目旨在重新定义用户购买度假套餐的体验，推动英航子品牌度假产品的差异化，扩大用户规模并提高「机票 + 酒店 / 租车 / 度假套餐」组合的购买率。
+- 智能旅行助手 BE 设计方案：总结用户研究结果，提出并设计智能旅行助手 BE，优化用户在度假套餐选择过程中的体验。
+- Holiday Pathfinder 模块设计：根据对用户购买「度假套餐」需求的分析，设计并优化 Holiday Pathfinder 模块，提升用户浏览的沉浸感与趣味性，成功提高产品的购买率。
+- 产品服务蓝图交付：通过与英航内部 IT、数据、客服等团队的跨部门协作，明确各系统的能力和限制，独立交付前后端可执行的产品服务蓝图，确保产品顺利落地并实施。
+`
+
+type ChatMessage = {
+  role: 'user' | 'assistant'
+  content: string
+}
+
 type ChatbotPanelProps = {
   onClose: () => void
 }
 
 function ChatbotPanel({ onClose }: ChatbotPanelProps) {
+  const defaultFollowups: string[] = [
+    "What's the story behind your NanoSafari work?",
+    'How do you balance design and engineering across your roles?',
+    'What projects are you most proud of?',
+  ]
+
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [followups, setFollowups] = useState<string[]>(defaultFollowups)
+  const [pendingAnswer, setPendingAnswer] = useState<string | null>(null)
+  const [displayedAnswer, setDisplayedAnswer] = useState('')
+
+  const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null
+  const bottomRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!pendingAnswer) return
+
+    const full = pendingAnswer
+    setDisplayedAnswer('')
+    let index = 0
+    const step = 1
+
+    const interval = window.setInterval(() => {
+      index += step
+      setDisplayedAnswer(full.slice(0, index))
+      if (bottomRef.current) {
+        bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      }
+      if (index >= full.length) {
+        window.clearInterval(interval)
+        setDisplayedAnswer(full)
+        setMessages((prev: ChatMessage[]) => {
+          const next: ChatMessage[] = [...prev, { role: 'assistant', content: full }]
+          void (async () => {
+            await refreshFollowups(next)
+            setPendingAnswer(null)
+          })()
+          return next
+        })
+      }
+    }, 35)
+
+    return () => window.clearInterval(interval)
+  }, [pendingAnswer])
+
+  useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }
+  }, [messages.length, displayedAnswer, isLoading])
+
+  async function handleSend() {
+    const question = input.trim()
+    if (!question || isLoading) return
+
+    const nextMessages: ChatMessage[] = [...messages, { role: 'user', content: question }]
+    setMessages(nextMessages)
+    setInput('')
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const apiKey = import.meta.env.VITE_SILICONFLOW_API_KEY
+      if (!apiKey) {
+        throw new Error('Missing SiliconFlow API key')
+      }
+
+      const historyForModel = [
+        {
+          role: 'system',
+          content: `You are a portfolio Q&A assistant.\n\nAlways answer in plain text only: no markdown, no bullet points, no headings. Use at most three short sentences per answer.\n\nHere is the resume context:\n${RESUME_CONTEXT}`,
+        },
+        ...nextMessages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+      ]
+
+      const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'deepseek-ai/DeepSeek-R1',
+          messages: historyForModel,
+          temperature: 0.2,
+        }),
+      })
+
+      if (!response.ok) {
+        const text = await response.text()
+        throw new Error(`SiliconFlow API error: ${response.status} ${text}`)
+      }
+
+      const data: any = await response.json()
+      let answerText: string =
+        data?.choices?.[0]?.message?.content && typeof data.choices[0].message.content === 'string'
+          ? data.choices[0].message.content
+          : ''
+
+      if (!answerText) {
+        answerText = 'Sorry, I could not generate a reply from the model. Please try again.'
+      }
+
+      setPendingAnswer(answerText)
+    } catch (err) {
+      console.error(err)
+      setError('Chat service is temporarily unavailable. Please check your API key or try again later.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      void handleSend()
+    }
+  }
+
+  function handleReset() {
+    setMessages([])
+    setInput('')
+    setError(null)
+    setFollowups(defaultFollowups)
+  }
+
+  async function refreshFollowups(nextMessages: ChatMessage[]) {
+    try {
+      const apiKey = import.meta.env.VITE_SILICONFLOW_API_KEY
+      if (!apiKey) {
+        return
+      }
+
+      const historyForModel = [
+        {
+          role: 'system',
+          content:
+            'You are helping suggest follow-up questions for a portfolio Q&A chatbot.\n' +
+            'Given the conversation so far, generate 3 concise follow-up questions the user might ask next.\n' +
+            'Return ONLY a valid JSON string of the form {"suggestions":["q1","q2","q3"]} with no extra text.',
+        },
+        ...nextMessages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+      ]
+
+      const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'deepseek-ai/DeepSeek-R1',
+          messages: historyForModel,
+          temperature: 0.5,
+        }),
+      })
+
+      if (!response.ok) {
+        return
+      }
+
+      const data: any = await response.json()
+      let raw: string =
+        data?.choices?.[0]?.message?.content && typeof data.choices[0].message.content === 'string'
+          ? data.choices[0].message.content
+          : ''
+
+      if (!raw) return
+
+      // 如果模型在 JSON 外面包了额外文本，尽量截出第一个 {...} 再解析
+      const firstBrace = raw.indexOf('{')
+      const lastBrace = raw.lastIndexOf('}')
+      if (firstBrace !== -1 && lastBrace > firstBrace) {
+        raw = raw.slice(firstBrace, lastBrace + 1)
+      }
+
+      let parsed: any
+      try {
+        parsed = JSON.parse(raw)
+      } catch {
+        return
+      }
+
+      if (!parsed || !Array.isArray(parsed.suggestions)) return
+
+      const clean = parsed.suggestions
+        .map((s: any) => (typeof s === 'string' ? s.trim() : ''))
+        .filter((s: string) => s.length > 0)
+        .slice(0, 3)
+
+      if (clean.length === 0) return
+
+      setFollowups(clean)
+    } catch (err) {
+      console.error('Failed to refresh followups', err)
+    }
+  }
+
+  async function handleSuggestionClick(prompt: string) {
+    if (!prompt || isLoading) return
+
+    const nextMessages: ChatMessage[] = [...messages, { role: 'user', content: prompt }]
+    setMessages(nextMessages)
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const apiKey = import.meta.env.VITE_SILICONFLOW_API_KEY
+      if (!apiKey) {
+        throw new Error('Missing SiliconFlow API key')
+      }
+
+      const historyForModel = [
+        {
+          role: 'system',
+          content: `You are a portfolio Q&A assistant.\n\nAlways answer in plain text only: no markdown, no bullet points, no headings. Use at most three short sentences per answer.\n\nHere is the resume context:\n${RESUME_CONTEXT}`,
+        },
+        ...nextMessages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+      ]
+
+      const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'deepseek-ai/DeepSeek-R1',
+          messages: historyForModel,
+          temperature: 0.2,
+        }),
+      })
+
+      if (!response.ok) {
+        const text = await response.text()
+        throw new Error(`SiliconFlow API error: ${response.status} ${text}`)
+      }
+
+      const data: any = await response.json()
+      let answerText: string =
+        data?.choices?.[0]?.message?.content && typeof data.choices[0].message.content === 'string'
+          ? data.choices[0].message.content
+          : ''
+
+      if (!answerText) {
+        answerText = 'Sorry, I could not generate a reply from the model. Please try again.'
+      }
+
+      setPendingAnswer(answerText)
+    } catch (err) {
+      console.error(err)
+      setError('Chat service is temporarily unavailable. Please check your API key or try again later.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <>
-      <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-        <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] text-slate-500">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          <span>Chat with my portfolio</span>
-        </div>
-        <button
-          onClick={onClose}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-          aria-label="Close chatbot"
-        >
-          <span className="text-lg leading-none">&times;</span>
-        </button>
-      </div>
-      <div className="flex flex-1 flex-col gap-3 px-5 py-4">
-        <p className="text-sm leading-relaxed text-slate-500">
-          This assistant can answer questions about my projects, experience, and how I think about building products.
-        </p>
-        <div className="flex items-center justify-between text-xs text-slate-500">
-          <span>Portfolio chat assistant</span>
-          <span className="inline-flex items-center gap-2">
-            <span className="relative inline-flex h-2 w-2 items-center justify-center">
-              <span className="absolute inline-flex h-3 w-3 rounded-full bg-emerald-500/20" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-            </span>
-            <span>Online</span>
-          </span>
-        </div>
-        <div className="flex flex-1 flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50/80 p-3">
-          <div className="max-w-[85%] self-start rounded-2xl rounded-bl-sm bg-slate-100 px-3 py-2 text-xs text-slate-900">
-            Hi, I&apos;m your digital twin. Ask me about my projects, experience, or how I think about design.
-          </div>
-          <div className="max-w-[85%] self-end rounded-2xl rounded-br-sm bg-slate-900 px-3 py-2 text-xs text-slate-50">
-            What&apos;s a recent project you&apos;re proud of?
-          </div>
-          <div className="self-center pt-1 text-[10px] text-slate-400">
-            Prototype: local replies only. Will be powered by an LLM.
-          </div>
-        </div>
-        <div className="flex items-end gap-2 pt-2">
-          <input
-            type="text"
-            placeholder="Ask about my projects, experience, or skills?"
-            className="flex flex-1 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300"
-          />
-          <button className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-xs text-slate-50 hover:bg-slate-800">
-            <span className="flex h-4 w-4 items-center justify-center rounded-full border border-slate-50 text-[10px]">
-              ?
-            </span>
-            <span>Send</span>
+      {/* Header bar */}
+      <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3">
+        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <span>+1 LLM</span>
+          <button
+            type="button"
+            className="flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 text-[10px]"
+            aria-label="About this assistant"
+          >
+            i
           </button>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            aria-label="Reset conversation"
+          >
+            ↻
+          </button>
+          <button
+            onClick={onClose}
+            className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            aria-label="Close chatbot"
+          >
+            <span className="text-lg leading-none">&times;</span>
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col min-h-0 bg-slate-50">
+        <div className="flex-1 overflow-y-auto px-6 py-6">
+          {messages.length > 0 && (
+            <div className="space-y-4 text-sm leading-relaxed">
+              {messages.map((message, index) => {
+                const isLastAssistantPending =
+                  pendingAnswer !== null &&
+                  index === messages.length - 1 &&
+                  message.role === 'assistant'
+
+                if (isLastAssistantPending) {
+                  // 这一条正在用打字机展示，不再重复渲染完整文本
+                  return null
+                }
+
+                return (
+                  <div
+                    key={index}
+                    className={message.role === 'user' ? 'flex justify-end' : 'flex justify-start'}
+                  >
+                    {message.role === 'user' && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        className="max-w-[85%] rounded-2xl rounded-br-sm bg-slate-900 px-4 py-2.5 text-slate-50"
+                      >
+                        {message.content}
+                      </motion.div>
+                    )}
+                    {message.role === 'assistant' && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        className="max-w-[85%] text-slate-800 whitespace-pre-line"
+                      >
+                        {message.content}
+                      </motion.div>
+                    )}
+                  </div>
+                )
+              })}
+
+              {pendingAnswer && (
+                <div className="flex justify-start">
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    className="max-w-[85%] text-slate-800 whitespace-pre-line"
+                  >
+                    {displayedAnswer}
+                  </motion.div>
+                </div>
+              )}
+
+              {!isLoading && !pendingAnswer && lastMessage?.role === 'assistant' && followups.length > 0 && (
+                <div className="mt-2 border-t border-slate-100 pt-3 text-[13px] text-slate-600">
+                  <div className="space-y-2">
+                    {followups.map((prompt) => (
+                      <button
+                        key={prompt}
+                        type="button"
+                        onClick={() => void handleSuggestionClick(prompt)}
+                        className="group flex w-full items-baseline gap-2 text-left hover:text-slate-800"
+                      >
+                        <span className="mt-[2px] text-slate-400 group-hover:text-slate-500">↳</span>
+                        <span>{prompt}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {isLoading && (
+                <div className="flex justify-start">
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex max-w-[85%] items-center gap-1 rounded-2xl rounded-bl-sm bg-slate-100 px-4 py-3"
+                  >
+                    <motion.span
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ duration: 0.8, repeat: Infinity }}
+                      className="h-2 w-2 rounded-full bg-slate-500"
+                    />
+                    <motion.span
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ duration: 0.8, repeat: Infinity, delay: 0.15 }}
+                      className="h-2 w-2 rounded-full bg-slate-500"
+                    />
+                    <motion.span
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ duration: 0.8, repeat: Infinity, delay: 0.3 }}
+                      className="h-2 w-2 rounded-full bg-slate-500"
+                    />
+                  </motion.div>
+                </div>
+              )}
+            </div>
+          )}
+          <div ref={bottomRef} className="h-px" />
+          {error && (
+            <div className="mt-3 rounded-md bg-rose-50 px-3 py-2 text-[11px] text-rose-600">{error}</div>
+          )}
+        </div>
+
+        {messages.length === 0 && (
+          <div className="shrink-0 bg-slate-50 px-6 pb-6 pt-4">
+            <h2 className="text-xl font-medium tracking-tight text-slate-800">Welcome to +1 LLM.</h2>
+            <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-500">
+              Ask about projects, experience, or how I think about building products.
+            </p>
+            <div className="mt-6 space-y-3 text-[13px] text-slate-600">
+              {defaultFollowups.map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => void handleSuggestionClick(prompt)}
+                  className="group flex w-full items-baseline gap-2 text-left hover:text-slate-800"
+                >
+                  <span className="mt-[2px] text-slate-400 group-hover:text-slate-500">↳</span>
+                  <span>{prompt}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="shrink-0 border-t border-slate-200 bg-slate-50 px-5 py-3">
+          <div className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2">
+            <input
+              type="text"
+              placeholder="Ask about +1..."
+              className="flex-1 border-none bg-transparent text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none"
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isLoading}
+            />
+            <button
+              type="button"
+              onClick={() => void handleSend()}
+              disabled={isLoading}
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-[11px] text-slate-50 hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-700/70"
+              aria-label="Send message"
+            >
+              ↑
+            </button>
+          </div>
         </div>
       </div>
     </>
@@ -90,7 +531,7 @@ export function App() {
     <div className={rootClassName}>
       <div
         className={`w-full ${
-          chatbotOpen ? 'flex flex-col main-with-drawer md:h-screen md:flex-row md:flex-nowrap md:gap-8' : ''
+          chatbotOpen ? 'flex flex-col main-with-drawer md:h-screen md:flex-row md:flex-nowrap' : ''
         }`}
       >
         <div className={chatbotOpen ? 'main-content-col min-w-0 flex-1 md:h-screen md:overflow-y-auto' : ''}>
