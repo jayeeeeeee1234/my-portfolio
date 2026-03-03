@@ -146,12 +146,11 @@ a,
   position: fixed;
   top: 0;
   left: 0;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   pointer-events: none;
   background: #ffffff;
   mix-blend-mode: difference;
-  border-radius: 2px;
   z-index: 50;
 }
 
@@ -179,6 +178,8 @@ a,
 @media (min-width: 1440px) {
   .hero-row {
     flex-direction: row;
+    align-items: flex-end !important;
+    padding-top: 160px;
   }
 }
 
@@ -192,9 +193,39 @@ a,
 }
 
 .project-title {
-  font-family: 'mazius', 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-family: 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-weight: 400;
 }
 
 .nav-mono {
   font-family: 'Geist Mono', 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+.project-footer {
+  font-size: 16px;
+}
+
+.project-meta {
+  font-family: 'Geist Mono', 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 14px;
+}
+
+@media (max-width: 967px) {
+  .project-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Chatbot 面板内字体微调 */
+.chatbot-panel h2.text-xl {
+  font-family: 'Tiempos', 'mazius', 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+.chatbot-panel span {
+  font-family: 'Geist Mono', 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 14px;
+}
+
+.chatbot-panel span.text-lg {
+  font-size: 20px;
 }

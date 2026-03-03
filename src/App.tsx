@@ -7,7 +7,15 @@ const companies = [
   { year: '2024', name: 'Shanghai Artificial Intelligence Research Institute', role: 'Product Designer' },
   { year: '2024', name: 'Knowhow Consulting', role: 'Freelance User Researcher' },
   { year: '2023', name: 'Bank of China', role: 'User Experience Designer' },
-  { year: '2022', name: 'Accenture Song', role: 'Service Designer Intern' },
+  { year: '2022', name: 'Accenture Song', role: 'Service Design Intern' },
+]
+
+const projects = [
+  { title: 'Building a 0→1 AI Design System', meta: 'SAIRI · 2025' },
+  { title: 'AI-Driven Nanoparticle Research Platform', meta: 'SAIRI · 2024' },
+  { title: 'IT Asset Platform Redesign', meta: 'Bank of China · 2023' },
+  { title: 'BE: Holiday Booking Intelligence', meta: 'Accenture Song · 2022' },
+  { title: 'NatWest Community Service Platform', meta: 'NatWest · 2021' },
 ]
 
 const navItems = [
@@ -330,7 +338,7 @@ function ChatbotPanel({ onClose }: ChatbotPanelProps) {
   }
 
   return (
-    <>
+    <div className="flex min-h-0 flex-1 flex-col chatbot-panel">
       {/* Header bar */}
       <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3">
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -515,7 +523,7 @@ function ChatbotPanel({ onClose }: ChatbotPanelProps) {
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 
@@ -574,7 +582,7 @@ export function App() {
       >
         <div className={chatbotOpen ? 'main-content-col min-w-0 flex-1 md:h-screen md:overflow-y-auto' : ''}>
           <div className="mx-auto w-full max-w-[1800px] px-4 md:px-8">
-            <header className="border-b border-slate-100">
+            <header className="relative border-b border-slate-100">
               <div className="flex items-center justify-between py-4 font-light md:py-5">
                 <div className="flex items-center gap-2 text-[14px] font-normal uppercase tracking-[0.14em] text-slate-400 nav-mono">
                   <span className="text-slate-900 tracking-normal">JIAYI</span>
@@ -625,11 +633,16 @@ export function App() {
                   <button
                     type="button"
                     onClick={() => setMenuOpen((prev) => !prev)}
-                    className="flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 md:hidden"
+                    className="flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 md:hidden transition-colors duration-200"
                     aria-expanded={menuOpen}
                     aria-label="Toggle menu"
                   >
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className={`h-5 w-5 transition-transform duration-200 ${menuOpen ? 'rotate-90' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       {menuOpen ? (
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       ) : (
@@ -639,28 +652,39 @@ export function App() {
                   </button>
                 </div>
               </div>
-              {menuOpen && (
-                <div className="border-t border-slate-100 py-4 md:hidden">
-                  <nav className="flex flex-col gap-1 text-[11px] font-medium uppercase tracking-[0.16em] nav-mono">
-                    {navItems.map((item) => (
-                      <button
-                        key={item.label}
-                        onClick={() => setMenuOpen(false)}
-                        className={`rounded-md px-3 py-2 text-left ${item.active ? 'bg-slate-50 text-slate-900' : 'text-slate-500'}`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </nav>
-                </div>
-              )}
+              <AnimatePresence>
+                {menuOpen && (
+                  <motion.div
+                    key="mobile-nav"
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    className="absolute inset-x-0 top-full z-30 border-y border-slate-100 bg-white py-4 md:hidden"
+                  >
+                    <nav className="flex flex-col gap-1 text-[11px] font-medium uppercase tracking-[0.16em] nav-mono">
+                      {navItems.map((item) => (
+                        <button
+                          key={item.label}
+                          onClick={() => setMenuOpen(false)}
+                          className={`px-3 py-2 text-left ${
+                            item.active ? 'text-slate-900' : 'text-slate-500 hover:text-slate-900'
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </header>
 
             <main className="pb-24 pt-12 md:pt-20">
               <div className="flex flex-col gap-6">
-                <section className="flex flex-col gap-8 pt-16 hero-row md:items-start md:justify-start md:gap-16">
+                <section className="flex flex-col gap-8 hero-row md:items-start md:justify-start md:gap-16">
                   <div className="max-w-xl md:max-w-none md:flex-1">
-                    <h1 className="text-[28px] leading-tight tracking-normal text-slate-900 md:text-[48px] xl:text-[52px]">
+                    <h1 className="text-[36px] leading-tight tracking-normal text-slate-900 md:text-[48px] xl:text-[52px]">
                       I&apos;m Jiayi, a product designer who <span className="italic">engineers.</span>
                     </h1>
                   </div>
@@ -699,13 +723,18 @@ export function App() {
                   </div>
                 </section>
 
-                <section className="flex flex-col gap-6 pt-4 md:flex-row md:gap-10 md:pt-12">
-                  <article className="flex flex-1 items-end rounded-[24px] bg-gradient-to-tr from-orange-400 via-rose-500 to-indigo-500 px-8 pb-6 pt-20 text-lg font-medium text-white shadow-[0_32px_80px_rgba(15,23,42,0.45)] md:px-10 md:pb-8 md:pt-24">
-                    <div className="project-title">OpenAI x Hardware</div>
-                  </article>
-                  <article className="flex flex-1 rounded-[24px] bg-slate-50 p-6 shadow-[0_24px_60px_rgba(148,163,184,0.35)] md:p-8">
-                    <div className="h-32 w-full rounded-2xl bg-violet-100 md:h-40" />
-                  </article>
+                <section className="project-grid grid gap-5 pt-0 md:grid-cols-2 md:gap-10 md:pt-0">
+                  {projects.map((project) => (
+                    <article key={project.title} className="flex flex-1 flex-col bg-white">
+                      <div className="aspect-[4/3] w-full overflow-hidden bg-slate-100">
+                        {/* 预览媒体：后续可替换成 <video> 或 <img src="..." /> */}
+                      </div>
+                      <div className="project-footer flex items-center justify-between px-0 py-4 text-sm text-slate-700 md:px-0 md:py-4">
+                        <div className="text-slate-900 project-title">{project.title}</div>
+                        <div className="project-meta text-slate-500">{project.meta}</div>
+                      </div>
+                    </article>
+                  ))}
                 </section>
               </div>
             </main>
@@ -735,7 +764,7 @@ export function App() {
       {cursorVisible && (
         <div
           className="custom-cursor"
-          style={{ transform: `translate3d(${cursorPos.x - 10}px, ${cursorPos.y - 10}px, 0)` }}
+          style={{ transform: `translate3d(${cursorPos.x - 8}px, ${cursorPos.y - 8}px, 0)` }}
         />
       )}
     </div>
