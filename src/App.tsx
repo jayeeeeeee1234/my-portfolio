@@ -11,7 +11,7 @@ const companies = [
 ]
 
 const projects = [
-  { title: 'Building a 0→1 AI Design System', meta: 'SAIRI · 2025' },
+  { title: 'Building a 0→1 AI Design System', meta: 'SAIRI · 2025', url: '/projects/ai-design-system' },
   { title: 'AI-Driven Nanoparticle Research Platform', meta: 'SAIRI · 2024' },
   { title: 'IT Asset Platform Redesign', meta: 'Bank of China · 2023' },
   { title: 'BE: Holiday Booking Intelligence', meta: 'Accenture Song · 2022' },
@@ -65,6 +65,74 @@ type ChatMessage = {
 
 type ChatbotPanelProps = {
   onClose: () => void
+}
+
+function AiDesignSystemContent() {
+  return (
+    <div className="flex flex-col gap-10 md:gap-14">
+      <div className="space-y-10 md:max-w-[800px] md:mx-auto">
+        <section className="flex flex-col gap-4">
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-[0.16em] text-slate-400 nav-mono">Case Study · 2025</p>
+            <h1 className="text-[32px] leading-tight text-slate-900 md:text-[40px] project-title">
+              Building a 0→1 AI Design System
+            </h1>
+            <p className="max-w-2xl text-[15px] leading-relaxed text-slate-500">
+              Designing and shipping an AI-native design system from zero to one — aligning product, engineering, and
+              design teams around a shared language for interaction, motion, and AI behaviors.
+            </p>
+          </div>
+        </section>
+
+        <section id="overview" className="space-y-4">
+          <h2 className="text-sm font-normal uppercase tracking-[0.18em] text-slate-400 nav-mono">Overview</h2>
+          <p className="text-[15px] leading-relaxed text-slate-600">
+            This page is a dedicated deep dive into how the AI design system was defined, structured, and rolled out —
+            from token architecture and component patterns to how the system captures AI-specific behaviors like
+            uncertainty, latency, and conversational flows.
+          </p>
+        </section>
+
+        <section id="at-a-glance" className="space-y-3">
+          <h3 className="text-sm font-normal uppercase tracking-[0.18em] text-slate-400 nav-mono">At a glance</h3>
+          <ul className="space-y-2 text-[13px] leading-relaxed text-slate-600">
+            <li>— Platform: Web · Internal tools</li>
+            <li>— Focus: System thinking, AI interaction, design tokens</li>
+            <li>— Role: End-to-end product design</li>
+          </ul>
+        </section>
+
+        <section id="wip" className="space-y-4">
+          <h2 className="text-sm font-normal uppercase tracking-[0.18em] text-slate-400 nav-mono">Work in progress</h2>
+          <p className="text-[13px] leading-relaxed text-slate-500">
+            I&apos;m still translating the full case study into this page. If you&apos;re curious about this work, feel
+            free to reach out — I&apos;d be happy to walk you through the system live.
+          </p>
+        </section>
+      </div>
+
+      <nav className="case-index hidden text-xs text-slate-500 lg:block">
+        <p className="mb-3 uppercase tracking-[0.16em] text-slate-400 nav-mono">Index</p>
+        <ul className="space-y-1.5">
+          <li>
+            <a href="#overview" className="hover:text-slate-800">
+              Overview
+            </a>
+          </li>
+          <li>
+            <a href="#at-a-glance" className="hover:text-slate-800">
+              At a glance
+            </a>
+          </li>
+          <li>
+            <a href="#wip" className="hover:text-slate-800">
+              Work in progress
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  )
 }
 
 function ChatbotPanel({ onClose }: ChatbotPanelProps) {
@@ -534,6 +602,9 @@ export function App() {
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [cursorVisible, setCursorVisible] = useState(true)
 
+  const isAiDesignSystem =
+    typeof window !== 'undefined' && window.location.pathname.startsWith('/projects/ai-design-system')
+
   const rootClassName = `min-h-screen bg-white text-slate-900${
     chatbotOpen ? ' overflow-hidden' : ''
   }`
@@ -573,6 +644,11 @@ export function App() {
     }
   }, [cursorVisible])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    document.title = isAiDesignSystem ? 'AI Design System' : "Jiayi Zhu's Website"
+  }, [isAiDesignSystem])
+
   return (
     <div className={rootClassName}>
       <div
@@ -584,12 +660,15 @@ export function App() {
           <div className="mx-auto w-full max-w-[1800px] px-4 md:px-8">
             <header className="relative border-b border-slate-100">
               <div className="flex items-center justify-between py-4 font-light md:py-5">
-                <div className="flex items-center gap-2 text-[14px] font-normal uppercase tracking-[0.14em] text-slate-400 nav-mono">
+                <a
+                  href="/"
+                  className="flex items-center gap-2 text-[14px] font-normal uppercase tracking-[0.14em] text-slate-400 nav-mono"
+                >
                   <span className="text-slate-900 tracking-normal">JIAYI</span>
                   <span className="tracking-normal">ZHU</span>
                   <span className="hidden h-3 w-px bg-slate-200 md:block" />
                   <span className="hidden md:inline tracking-normal">Product Designer + Engineer</span>
-                </div>
+                </a>
                 <div className="flex items-center gap-3 md:gap-6">
                   <nav className="hidden md:flex md:items-center md:gap-8 text-[14px] font-normal uppercase tracking-normal nav-mono">
                     {navItems.map((item) => (
@@ -681,8 +760,9 @@ export function App() {
             </header>
 
             <main className="pb-24 pt-12 md:pt-20">
-              <div className="flex flex-col gap-6">
-                <section className="flex flex-col gap-8 hero-row md:items-start md:justify-start md:gap-16">
+              {!isAiDesignSystem && (
+                <div className="flex flex-col gap-6">
+                  <section className="flex flex-col gap-8 hero-row md:items-start md:justify-start md:gap-16">
                   <div className="max-w-xl md:max-w-none md:flex-1">
                     <h1 className="text-[36px] leading-tight tracking-normal text-slate-900 md:text-[48px] xl:text-[52px]">
                       I&apos;m Jiayi, a product designer who <span className="italic">engineers.</span>
@@ -721,22 +801,44 @@ export function App() {
                       </div>
                     </div>
                   </div>
-                </section>
+                  </section>
 
-                <section className="project-grid grid gap-5 pt-0 md:grid-cols-2 md:gap-10 md:pt-0">
-                  {projects.map((project) => (
-                    <article key={project.title} className="flex flex-1 flex-col bg-white">
-                      <div className="aspect-[4/3] w-full overflow-hidden bg-slate-100">
-                        {/* 预览媒体：后续可替换成 <video> 或 <img src="..." /> */}
-                      </div>
-                      <div className="project-footer flex items-center justify-between px-0 py-4 text-sm text-slate-700 md:px-0 md:py-4">
-                        <div className="text-slate-900 project-title">{project.title}</div>
-                        <div className="project-meta text-slate-500">{project.meta}</div>
-                      </div>
-                    </article>
-                  ))}
-                </section>
-              </div>
+                  <section className="project-grid grid gap-5 pt-0 md:grid-cols-2 md:gap-10 md:pt-0">
+                    {projects.map((project) => (
+                      <article key={project.title} className="flex flex-1 flex-col bg-white">
+                        {project.url ? (
+                          <a
+                            href={project.url}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            className="flex h-full flex-col"
+                          >
+                            <div className="aspect-[4/3] w-full overflow-hidden bg-slate-100">
+                              {/* 预览媒体：后续可替换成 <video> 或 <img src="..." /> */}
+                            </div>
+                            <div className="project-footer flex items-center justify-between px-0 py-4 text-sm text-slate-700 md:px-0 md:py-4">
+                              <div className="text-slate-900 project-title">{project.title}</div>
+                              <div className="project-meta text-slate-500">{project.meta}</div>
+                            </div>
+                          </a>
+                        ) : (
+                          <>
+                            <div className="aspect-[4/3] w-full overflow-hidden bg-slate-100">
+                              {/* 预览媒体：后续可替换成 <video> 或 <img src="..." /> */}
+                            </div>
+                            <div className="project-footer flex items-center justify-between px-0 py-4 text-sm text-slate-700 md:px-0 md:py-4">
+                              <div className="text-slate-900 project-title">{project.title}</div>
+                              <div className="project-meta text-slate-500">{project.meta}</div>
+                            </div>
+                          </>
+                        )}
+                      </article>
+                    ))}
+                  </section>
+                </div>
+              )}
+
+              {isAiDesignSystem && <AiDesignSystemContent />}
             </main>
           </div>
         </div>

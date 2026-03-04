@@ -210,6 +210,19 @@ a,
   font-size: 14px;
 }
 
+.case-index {
+  position: fixed;
+  top: 50%;
+  left: calc(50% + 420px);
+  transform: translateY(-50%);
+}
+
+@media (min-width: 1280px) {
+  .case-index {
+    left: calc(50% + 460px);
+  }
+}
+
 @media (max-width: 967px) {
   .project-grid {
     grid-template-columns: 1fr !important;
