@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type React from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useScroll, useTransform } from 'motion/react'
 import './style.css'
 
 const companies = [
@@ -67,25 +67,85 @@ type ChatbotPanelProps = {
   onClose: () => void
 }
 
+const TITLE_FADE_DISTANCE = 72
+
 function AiDesignSystemContent() {
+  const [indexVisible, setIndexVisible] = useState(false)
+  const heroImageRef = useRef<HTMLDivElement>(null)
+  const heroTitleRef = useRef<HTMLDivElement>(null)
+  const titleScrollStartRef = useRef(0)
+
+  const { scrollY } = useScroll()
+  const titleOpacity = useTransform(scrollY, (y) => {
+    const start = titleScrollStartRef.current
+    if (start === 0) return 1
+    return Math.max(0, Math.min(1, (start + TITLE_FADE_DISTANCE - y) / TITLE_FADE_DISTANCE))
+  })
+
+  useLayoutEffect(() => {
+    if (heroTitleRef.current && typeof window !== 'undefined') {
+      const rect = heroTitleRef.current.getBoundingClientRect()
+      titleScrollStartRef.current = window.scrollY + rect.top
+    }
+  }, [])
+
+  useEffect(() => {
+    const el = heroImageRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setIndexVisible(!entry?.isIntersecting),
+      { threshold: 0, rootMargin: '0px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <div className="flex flex-col gap-10 md:gap-14">
-      <div className="space-y-10 md:max-w-[800px] md:mx-auto">
-        <section className="flex flex-col gap-4">
-          <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.16em] text-slate-400 nav-mono">Case Study · 2025</p>
-            <h1 className="text-[32px] leading-tight text-slate-900 md:text-[40px] project-title">
-              Building a 0→1 AI Design System
-            </h1>
-            <p className="max-w-2xl text-[15px] leading-relaxed text-slate-500">
-              Designing and shipping an AI-native design system from zero to one — aligning product, engineering, and
-              design teams around a shared language for interaction, motion, and AI behaviors.
-            </p>
+      {/* 页头：标题在顶部，仅向下滚动时标题渐隐（被头图遮住的感觉） */}
+      <header className="flex flex-col">
+        {/* 标题区：motion 随滚动渐隐，初始不遮住 */}
+        <motion.div
+          ref={heroTitleRef}
+          className="relative left-1/2 z-10 w-screen -translate-x-1/2 max-w-none bg-white px-4 py-8 md:px-8 md:py-12"
+          style={{ opacity: titleOpacity }}
+          transition={{ duration: 0 }}
+        >
+          <div className="mx-auto max-w-[1800px] flex flex-col gap-6 md:gap-8 md:flex-row md:items-end md:justify-between">
+            <div className="flex flex-col gap-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-slate-400 nav-mono">01</p>
+              <h1 className="text-[32px] leading-tight text-slate-900 md:text-[48px] lg:text-[56px] project-title max-w-2xl">
+                Building a 0→1 AI Design System
+              </h1>
+            </div>
+            <div className="flex flex-col gap-4 md:items-end md:text-right">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 nav-mono mb-1.5">Responsibilities</p>
+                <p className="text-[13px] text-slate-600 md:text-sm">Product design · Design system · AI interaction</p>
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 nav-mono mb-1.5">Deliverables</p>
+                <p className="text-[13px] text-slate-600 md:text-sm">Web · Internal tools</p>
+              </div>
+              <p className="text-[11px] uppercase tracking-[0.14em] text-slate-400 nav-mono mt-2">{' { SCROLL } '} →</p>
+            </div>
           </div>
-        </section>
-
+        </motion.div>
+        {/* 全宽缩略图：上移一层，部分在标题下方（z 低于标题），滚动时随标题渐隐露出 */}
+        <div
+          ref={heroImageRef}
+          className="relative left-1/2 z-0 w-screen -translate-x-1/2 -mt-20 md:-mt-28 max-w-none h-[50vh] overflow-hidden bg-slate-100"
+        >
+          {/* 预览媒体：后续可替换成 <video> 或 <img src="..." />，建议 object-cover 填满一屏 */}
+        </div>
+      </header>
+      <div className="space-y-10 md:max-w-[800px] md:mx-auto">
         <section id="overview" className="space-y-4">
-          <h2 className="text-sm font-normal uppercase tracking-[0.18em] text-slate-400 nav-mono">Overview</h2>
+          <h2 className="text-sm font-normal uppercase tracking-[0.18em] text-slate-400 nav-mono">Intro</h2>
+          <p className="text-[15px] leading-relaxed text-slate-600">
+            Designing and shipping an AI-native design system from zero to one — aligning product, engineering, and
+            design teams around a shared language for interaction, motion, and AI behaviors.
+          </p>
           <p className="text-[15px] leading-relaxed text-slate-600">
             This page is a dedicated deep dive into how the AI design system was defined, structured, and rolled out —
             from token architecture and component patterns to how the system captures AI-specific behaviors like
@@ -95,7 +155,7 @@ function AiDesignSystemContent() {
 
         <section id="at-a-glance" className="space-y-3">
           <h3 className="text-sm font-normal uppercase tracking-[0.18em] text-slate-400 nav-mono">At a glance</h3>
-          <ul className="space-y-2 text-[13px] leading-relaxed text-slate-600">
+          <ul className="space-y-2 text-[13px] leading-relaxed text-slate-400">
             <li>— Platform: Web · Internal tools</li>
             <li>— Focus: System thinking, AI interaction, design tokens</li>
             <li>— Role: End-to-end product design</li>
@@ -111,21 +171,20 @@ function AiDesignSystemContent() {
         </section>
       </div>
 
-      <nav className="case-index hidden text-xs text-slate-500 lg:block">
-        <p className="mb-3 uppercase tracking-[0.16em] text-slate-400 nav-mono">Index</p>
+      <nav className={`case-index hidden text-xs text-slate-500 ${indexVisible ? 'lg:block' : ''}`}>
         <ul className="space-y-1.5">
           <li>
-            <a href="#overview" className="hover:text-slate-800">
+            <a href="#overview" className="text-slate-400 hover:text-slate-800">
               Overview
             </a>
           </li>
           <li>
-            <a href="#at-a-glance" className="hover:text-slate-800">
+            <a href="#at-a-glance" className="text-slate-400 hover:text-slate-800">
               At a glance
             </a>
           </li>
           <li>
-            <a href="#wip" className="hover:text-slate-800">
+            <a href="#wip" className="text-slate-400 hover:text-slate-800">
               Work in progress
             </a>
           </li>
