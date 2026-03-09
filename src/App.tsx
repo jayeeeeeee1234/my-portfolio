@@ -1,7 +1,8 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type React from 'react'
-import { AnimatePresence, motion, useScroll, useTransform } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import './style.css'
+import heroImage from './images/ai-design-system-hero.jpg'
 
 const companies = [
   { year: '2024', name: 'Shanghai Artificial Intelligence Research Institute', role: 'Product Designer' },
@@ -67,25 +68,73 @@ type ChatbotPanelProps = {
   onClose: () => void
 }
 
-const TITLE_FADE_DISTANCE = 72
+const TITLE_FADE_DISTANCE = 340
+const TITLE_MOVE_UP_PX = 140
+const HERO_IMAGE_PARALLAX = 0.45
+
+function getScrollParent(el: HTMLElement | null): Window | HTMLElement {
+  if (!el) return typeof window !== 'undefined' ? window : (null as unknown as Window)
+  let parent: HTMLElement | null = el.parentElement
+  while (parent) {
+    const overflowY = window.getComputedStyle(parent).overflowY
+    if (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') return parent
+    parent = parent.parentElement
+  }
+  return typeof window !== 'undefined' ? window : (null as unknown as Window)
+}
 
 function AiDesignSystemContent() {
   const [indexVisible, setIndexVisible] = useState(false)
+  const [titleStyle, setTitleStyle] = useState({ opacity: 1, y: 0, imageY: 0 })
   const heroImageRef = useRef<HTMLDivElement>(null)
   const heroTitleRef = useRef<HTMLDivElement>(null)
-  const titleScrollStartRef = useRef(0)
 
-  const { scrollY } = useScroll()
-  const titleOpacity = useTransform(scrollY, (y) => {
-    const start = titleScrollStartRef.current
-    if (start === 0) return 1
-    return Math.max(0, Math.min(1, (start + TITLE_FADE_DISTANCE - y) / TITLE_FADE_DISTANCE))
-  })
+  useEffect(() => {
+    const titleEl = heroTitleRef.current
+    if (!titleEl || typeof window === 'undefined') return
 
-  useLayoutEffect(() => {
-    if (heroTitleRef.current && typeof window !== 'undefined') {
-      const rect = heroTitleRef.current.getBoundingClientRect()
-      titleScrollStartRef.current = window.scrollY + rect.top
+    const container = getScrollParent(titleEl)
+    const isWindow = container === window
+    let rafId = 0
+
+    const onScroll = () => {
+      if (rafId) return
+      rafId = requestAnimationFrame(() => {
+        rafId = 0
+        const rect = titleEl.getBoundingClientRect()
+        const scrollY = isWindow ? window.scrollY : (container as HTMLElement).scrollTop
+        const containerRect = isWindow ? null : (container as HTMLElement).getBoundingClientRect()
+
+        const start =
+          isWindow
+            ? scrollY + rect.top
+            : scrollY + (rect.top - (containerRect!.top))
+
+        const scrollOffset = Math.max(0, scrollY - start)
+        const progress = Math.max(
+          0,
+          Math.min(1, scrollOffset / TITLE_FADE_DISTANCE)
+        )
+        const opacity = Math.max(0, Math.min(1, 1 - progress))
+        const imageY = scrollOffset * HERO_IMAGE_PARALLAX
+        setTitleStyle({
+          opacity,
+          y: -progress * TITLE_MOVE_UP_PX,
+          imageY,
+        })
+      })
+    }
+
+    if (isWindow) {
+      window.addEventListener('scroll', onScroll, { passive: true })
+    } else {
+      (container as HTMLElement).addEventListener('scroll', onScroll, { passive: true })
+    }
+    onScroll()
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId)
+      if (isWindow) window.removeEventListener('scroll', onScroll)
+      else (container as HTMLElement).removeEventListener('scroll', onScroll)
     }
   }, [])
 
@@ -104,21 +153,25 @@ function AiDesignSystemContent() {
     <div className="flex flex-col gap-10 md:gap-14">
       {/* 页头：标题在顶部，仅向下滚动时标题渐隐（被头图遮住的感觉） */}
       <header className="flex flex-col">
-        {/* 标题区：motion 随滚动渐隐，初始不遮住 */}
+        {/* 标题区：整块（背景+内容）随滚动上移，仅文字渐隐 */}
         <motion.div
           ref={heroTitleRef}
-          className="relative left-1/2 z-10 w-screen -translate-x-1/2 max-w-none bg-white px-4 py-8 md:px-8 md:py-12"
-          style={{ opacity: titleOpacity }}
-          transition={{ duration: 0 }}
+          className="relative z-10 w-screen max-w-none ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] bg-white px-4 pb-8 pt-8 md:px-8 md:pb-12 md:pt-12"
+          style={{ y: titleStyle.y }}
+          transition={{ duration: 0.42, ease: [0.33, 0, 0.2, 1] }}
         >
-          <div className="mx-auto max-w-[1800px] flex flex-col gap-6 md:gap-8 md:flex-row md:items-end md:justify-between">
+          <motion.div
+            className="mx-auto max-w-[1800px] flex flex-col gap-6 md:gap-8 md:flex-row md:items-end md:justify-start text-left"
+            style={{ opacity: titleStyle.opacity }}
+            transition={{ duration: 0.42, ease: [0.33, 0, 0.2, 1] }}
+          >
             <div className="flex flex-col gap-4">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400 nav-mono">01</p>
               <h1 className="text-[32px] leading-tight text-slate-900 md:text-[48px] lg:text-[56px] project-title max-w-2xl">
                 Building a 0→1 AI Design System
               </h1>
             </div>
-            <div className="flex flex-col gap-4 md:items-end md:text-right">
+            <div className="flex flex-col gap-4 md:items-start">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 nav-mono mb-1.5">Responsibilities</p>
                 <p className="text-[13px] text-slate-600 md:text-sm">Product design · Design system · AI interaction</p>
@@ -129,14 +182,24 @@ function AiDesignSystemContent() {
               </div>
               <p className="text-[11px] uppercase tracking-[0.14em] text-slate-400 nav-mono mt-2">{' { SCROLL } '} →</p>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
-        {/* 全宽缩略图：上移一层，部分在标题下方（z 低于标题），滚动时随标题渐隐露出 */}
+        {/* 全宽缩略图：外层固定布局，内层做视差（不破坏位置、不影响 index 判断） */}
         <div
           ref={heroImageRef}
-          className="relative left-1/2 z-0 w-screen -translate-x-1/2 -mt-20 md:-mt-28 max-w-none h-[50vh] overflow-hidden bg-slate-100"
+          className="relative left-1/2 z-0 w-screen -translate-x-1/2 -mt-20 md:-mt-28 max-w-none h-[80vh] overflow-hidden bg-white"
         >
-          {/* 预览媒体：后续可替换成 <video> 或 <img src="..." />，建议 object-cover 填满一屏 */}
+          <motion.div
+            className="h-full w-full"
+            style={{ y: titleStyle.imageY }}
+            transition={{ duration: 0.42, ease: [0.33, 0, 0.2, 1] }}
+          >
+            <img
+              src={heroImage}
+              alt="AI Design System"
+              className="h-full w-full object-cover object-center"
+            />
+          </motion.div>
         </div>
       </header>
       <div className="space-y-10 md:max-w-[800px] md:mx-auto">

@@ -129,6 +129,11 @@ body,
   height: 100%;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   font-family: 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-weight: 400;
