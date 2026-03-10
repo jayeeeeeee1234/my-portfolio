@@ -152,22 +152,22 @@ function AiDesignSystemContent() {
   return (
     <div className="flex flex-col gap-10 md:gap-14">
       {/* 页头：标题在顶部，仅向下滚动时标题渐隐（被头图遮住的感觉） */}
-      <header className="flex flex-col">
+      <header className="flex flex-col md:bg-white">
         {/* 标题区：整块（背景+内容）随滚动上移，仅文字渐隐 */}
         <motion.div
           ref={heroTitleRef}
-          className="relative z-10 w-screen max-w-none ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] bg-white px-4 pb-8 pt-8 md:px-8 md:pb-12 md:pt-12"
+          className="relative z-10 w-screen max-w-none ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] bg-white px-4 pt-0 pb-10 md:px-6 md:pt-14 md:pb-12 lg:px-8 lg:pt-20 lg:pb-12 max-h-[33vh] flex flex-col justify-center"
           style={{ y: titleStyle.y }}
           transition={{ duration: 0.42, ease: [0.33, 0, 0.2, 1] }}
         >
           <motion.div
-            className="mx-auto max-w-[1800px] flex flex-col gap-6 md:gap-8 md:flex-row md:items-end md:justify-start text-left"
+            className="mx-auto max-w-[1800px] flex flex-col gap-2 md:gap-3 md:flex-row md:items-end md:justify-start text-left lg:gap-6"
             style={{ opacity: titleStyle.opacity }}
             transition={{ duration: 0.42, ease: [0.33, 0, 0.2, 1] }}
           >
             <div className="flex flex-col gap-4">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400 nav-mono">01</p>
-              <h1 className="text-[32px] leading-tight text-slate-900 md:text-[48px] lg:text-[56px] project-title max-w-2xl">
+              <h1 className="text-[28px] leading-tight text-slate-900 md:text-[40px] lg:text-[48px] xl:text-[56px] project-title max-w-2xl font-medium">
                 Building a 0→1 AI Design System
               </h1>
             </div>
@@ -187,7 +187,7 @@ function AiDesignSystemContent() {
         {/* 全宽缩略图：外层固定布局，内层做视差（不破坏位置、不影响 index 判断） */}
         <div
           ref={heroImageRef}
-          className="relative left-1/2 z-0 w-screen -translate-x-1/2 -mt-20 md:-mt-28 max-w-none h-[80vh] overflow-hidden bg-white"
+          className="relative left-1/2 z-0 w-screen -translate-x-1/2 -mt-28 md:-mt-36 max-w-none h-[65vh] md:h-[72vh] lg:h-[80vh] overflow-hidden bg-white"
         >
           <motion.div
             className="h-full w-full"
@@ -881,7 +881,7 @@ export function App() {
               </AnimatePresence>
             </header>
 
-            <main className="pb-24 pt-12 md:pt-20">
+            <main className="pb-24 pt-8 md:pt-5">
               {!isAiDesignSystem && (
                 <div className="flex flex-col gap-6">
                   <section className="flex flex-col gap-8 hero-row md:items-start md:justify-start md:gap-16">
