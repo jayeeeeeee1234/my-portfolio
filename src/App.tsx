@@ -161,26 +161,36 @@ function AiDesignSystemContent() {
           transition={{ duration: 0.42, ease: [0.33, 0, 0.2, 1] }}
         >
           <motion.div
-            className="mx-auto max-w-[1800px] flex flex-col gap-2 md:gap-3 md:flex-row md:items-end md:justify-start text-left lg:gap-6"
+            className="mx-auto max-w-[1800px] flex flex-col gap-6 md:gap-3 md:flex-row md:items-center md:justify-start text-left lg:gap-6"
             style={{ opacity: titleStyle.opacity }}
             transition={{ duration: 0.42, ease: [0.33, 0, 0.2, 1] }}
           >
             <div className="flex flex-col gap-4">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400 nav-mono">01</p>
-              <h1 className="text-[28px] leading-tight text-slate-900 md:text-[40px] lg:text-[48px] xl:text-[56px] project-title max-w-2xl font-medium">
+              <h1 className="text-[28px] leading-tight text-slate-900 md:text-[40px] lg:text-[48px] xl:text-[56px] project-title font-medium max-w-xl">
                 Building a 0→1 AI Design System
               </h1>
             </div>
-            <div className="flex flex-col gap-4 md:items-start">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 nav-mono mb-1.5">Responsibilities</p>
-                <p className="text-[13px] text-slate-600 md:text-sm">Product design · Design system · AI interaction</p>
+            <div className="flex flex-col gap-3 md:items-start md:mt-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 md:gap-x-8 md:gap-y-4 md:items-start pb-2">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 nav-mono mb-1">Responsibilities</p>
+                  <p className="text-[13px] text-slate-600 md:text-sm">Design System</p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 nav-mono mb-1">Timeline</p>
+                  <p className="text-[13px] text-slate-600 md:text-sm">2025.10 - Now</p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 nav-mono mb-1">Team</p>
+                  <p className="text-[13px] text-slate-600 md:text-sm">1PM, 2Eng, 1UX (me!)</p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 nav-mono mb-1">Skills</p>
+                  <p className="text-[13px] text-slate-600 md:text-sm">Product Design, Design System, Motion Design</p>
+                </div>
               </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 nav-mono mb-1.5">Deliverables</p>
-                <p className="text-[13px] text-slate-600 md:text-sm">Web · Internal tools</p>
-              </div>
-              <p className="text-[11px] uppercase tracking-[0.14em] text-slate-400 nav-mono mt-2">{' { SCROLL } '} →</p>
+              <p className="text-[11px] uppercase tracking-[0.14em] text-slate-400 nav-mono self-end">{' { SCROLL } '} ↓</p>
             </div>
           </motion.div>
         </motion.div>
