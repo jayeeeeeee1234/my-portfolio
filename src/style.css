@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* 自带字体：Lay Grotesk & Mazius & Geist Mono & Tiempos
    实际文件名：
    public/fonts/lay-grotesk/
@@ -179,12 +183,12 @@ a,
   }
 }
 
-/* ≥1440px 时，hero 区域改为左右布局；以下尺寸保持上下布局 */
-@media (min-width: 1440px) {
+/* 仅当宽度足够、右侧工作列表不会换行时用左右两列；否则上下堆叠（约 1400px 以下会堆叠） */
+@media (min-width: 1400px) {
   .hero-row {
     flex-direction: row;
     align-items: flex-end !important;
-    padding-top: 160px;
+    padding-top: 120px;
   }
 }
 
@@ -194,6 +198,10 @@ a,
 }
 
 .hero-row h1 span.italic {
+  font-family: 'Tiempos', 'mazius', 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+.overview-lead {
   font-family: 'Tiempos', 'mazius', 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 

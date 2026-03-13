@@ -3,6 +3,8 @@ import type React from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import './style.css'
 import heroImage from './images/ai-design-system-hero.jpg'
+import solutionImg1 from './images/01_Design System/i2OZgaS2rExLLQf3Db1hmDCAcU.avif'
+import solutionImg2 from './images/01_Design System/xG1BYXl4T9LkoLjfM52mKNr4TtY.avif'
 
 const companies = [
   { year: '2024', name: 'Shanghai Artificial Intelligence Research Institute', role: 'Product Designer' },
@@ -156,7 +158,7 @@ function AiDesignSystemContent() {
         {/* 标题区：整块（背景+内容）随滚动上移，仅文字渐隐 */}
         <motion.div
           ref={heroTitleRef}
-          className="relative z-10 w-screen max-w-none ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] bg-white px-4 pt-0 pb-10 md:px-6 md:pt-14 md:pb-12 lg:px-8 lg:pt-20 lg:pb-12 max-h-[33vh] flex flex-col justify-center"
+          className="relative z-10 w-screen max-w-none ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] bg-white px-6 pt-0 pb-12 md:px-12 md:pt-14 md:pb-14 lg:px-16 lg:pt-20 lg:pb-16 max-h-[33vh] flex flex-col justify-center"
           style={{ y: titleStyle.y }}
           transition={{ duration: 0.42, ease: [0.33, 0, 0.2, 1] }}
         >
@@ -171,7 +173,7 @@ function AiDesignSystemContent() {
                 Building a 0→1 AI Design System
               </h1>
             </div>
-            <div className="flex flex-col gap-3 md:items-start md:mt-12">
+            <div className="flex flex-col gap-4 md:items-start md:mt-12">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 md:gap-x-8 md:gap-y-4 md:items-start pb-2">
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 nav-mono mb-1">Responsibilities</p>
@@ -214,16 +216,34 @@ function AiDesignSystemContent() {
       </header>
       <div className="space-y-10 md:max-w-[800px] md:mx-auto">
         <section id="overview" className="space-y-4">
-          <h2 className="text-sm font-normal uppercase tracking-[0.18em] text-slate-400 nav-mono">Intro</h2>
-          <p className="text-[15px] leading-relaxed text-slate-600">
-            Designing and shipping an AI-native design system from zero to one — aligning product, engineering, and
-            design teams around a shared language for interaction, motion, and AI behaviors.
+          <h2 className="text-sm font-normal uppercase tracking-[0.18em] text-slate-400 nav-mono">Overview</h2>
+          <p className="overview-lead text-2xl leading-relaxed text-slate-700">
+            How might we design a scalable design system for AI-native products?
           </p>
-          <p className="text-[15px] leading-relaxed text-slate-600">
-            This page is a dedicated deep dive into how the AI design system was defined, structured, and rolled out —
-            from token architecture and component patterns to how the system captures AI-specific behaviors like
-            uncertainty, latency, and conversational flows.
+          <p className="text-sm leading-relaxed text-slate-400">
+            At the Shanghai Artificial Intelligence Research Institute, multiple AI products were being developed in parallel for different research scenarios. As these products rapidly evolved, the team began facing challenges in maintaining consistent AI interaction patterns, reusable components, and efficient collaboration between design and development.
           </p>
+          <p className="text-sm leading-relaxed text-slate-400">
+            To address this, I initiated and built a 0→1 AI-native design system, establishing standardized interaction patterns, reusable AI components, and a unified design foundation to support multiple AI products.
+          </p>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-sm font-normal uppercase tracking-[0.18em] text-slate-400 nav-mono">Solution</h2>
+          <p className="text-2xl leading-relaxed text-slate-700">
+            Solution 正文待补充。
+          </p>
+          <p className="text-sm leading-relaxed text-slate-400">
+            说明待补充。
+          </p>
+          <div className="space-y-6">
+            <figure className="overflow-hidden rounded-lg border border-slate-200/80 bg-slate-50/50">
+              <img src={solutionImg1} alt="Design System solution 1" className="w-full object-cover" />
+            </figure>
+            <figure className="overflow-hidden rounded-lg border border-slate-200/80 bg-slate-50/50">
+              <img src={solutionImg2} alt="Design System solution 2" className="w-full object-cover" />
+            </figure>
+          </div>
         </section>
 
         <section id="at-a-glance" className="space-y-3">
@@ -247,17 +267,38 @@ function AiDesignSystemContent() {
       <nav className={`case-index hidden text-xs text-slate-500 ${indexVisible ? 'lg:block' : ''}`}>
         <ul className="space-y-1.5">
           <li>
-            <a href="#overview" className="text-slate-400 hover:text-slate-800">
+            <a
+              href="#overview"
+              className="text-slate-400 hover:text-slate-800"
+              onClick={(e) => {
+                e.preventDefault()
+                document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }}
+            >
               Overview
             </a>
           </li>
           <li>
-            <a href="#at-a-glance" className="text-slate-400 hover:text-slate-800">
+            <a
+              href="#at-a-glance"
+              className="text-slate-400 hover:text-slate-800"
+              onClick={(e) => {
+                e.preventDefault()
+                document.getElementById('at-a-glance')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }}
+            >
               At a glance
             </a>
           </li>
           <li>
-            <a href="#wip" className="text-slate-400 hover:text-slate-800">
+            <a
+              href="#wip"
+              className="text-slate-400 hover:text-slate-800"
+              onClick={(e) => {
+                e.preventDefault()
+                document.getElementById('wip')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }}
+            >
               Work in progress
             </a>
           </li>
@@ -788,8 +829,8 @@ export function App() {
           chatbotOpen ? 'flex flex-col main-with-drawer md:h-screen md:flex-row md:flex-nowrap' : ''
         }`}
       >
-        <div className={chatbotOpen ? 'main-content-col min-w-0 flex-1 md:h-screen md:overflow-y-auto' : ''}>
-          <div className="mx-auto w-full max-w-[1800px] px-4 md:px-8">
+        <div className={chatbotOpen ? 'main-content-col min-w-0 flex-1 md:h-screen md:overflow-y-auto md:scroll-smooth' : ''}>
+          <div className="mx-auto w-full max-w-[1800px] px-6">
             <header className="relative border-b border-slate-100">
               <div className="flex items-center justify-between py-4 font-light md:py-5">
                 <a
@@ -891,7 +932,7 @@ export function App() {
               </AnimatePresence>
             </header>
 
-            <main className="pb-24 pt-8 md:pt-5">
+            <main className="pb-24 pt-12">
               {!isAiDesignSystem && (
                 <div className="flex flex-col gap-6">
                   <section className="flex flex-col gap-8 hero-row md:items-start md:justify-start md:gap-16">
