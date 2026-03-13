@@ -192,7 +192,16 @@ function AiDesignSystemContent() {
                   <p className="text-[13px] text-slate-600 md:text-sm">Product Design, Design System, Motion Design</p>
                 </div>
               </div>
-              <p className="text-[11px] uppercase tracking-[0.14em] text-slate-400 nav-mono self-end">{' { SCROLL } '} ↓</p>
+              <button
+                type="button"
+                onClick={() => document.getElementById('overview')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                className="roll-hover text-[11px] uppercase tracking-[0.14em] text-slate-400 nav-mono self-end overflow-hidden h-[1.2em] hover:text-slate-600 transition-[color] duration-200"
+              >
+                <span className="roll-hover-inner flex flex-col transition-transform duration-300 ease-out">
+                  <span>{' { SCROLL } '} ↓</span>
+                  <span>{' { SCROLL } '} ↓</span>
+                </span>
+              </button>
             </div>
           </motion.div>
         </motion.div>
@@ -847,9 +856,12 @@ export function App() {
                     {navItems.map((item) => (
                       <button
                         key={item.label}
-                        className={item.active ? 'text-slate-900' : 'text-slate-300 hover:text-slate-500'}
+                        className={`roll-hover overflow-hidden h-[1.2em] ${item.active ? 'text-[#4f6f34] hover:text-slate-800' : 'text-slate-300 hover:text-[#4f6f34]'}`}
                       >
-                        {item.label}
+                        <span className="roll-hover-inner flex flex-col transition-transform duration-300 ease-out">
+                          <span>{item.label}</span>
+                          <span>{item.label}</span>
+                        </span>
                       </button>
                     ))}
                   </nav>
@@ -919,11 +931,14 @@ export function App() {
                         <button
                           key={item.label}
                           onClick={() => setMenuOpen(false)}
-                          className={`px-3 py-2 text-left ${
-                            item.active ? 'text-slate-900' : 'text-slate-500 hover:text-slate-900'
+                          className={`roll-hover overflow-hidden h-[1.2em] px-3 py-2 text-left ${
+                            item.active ? 'text-[#4f6f34] hover:text-slate-800' : 'text-slate-500 hover:text-[#4f6f34]'
                           }`}
                         >
-                          {item.label}
+                          <span className="roll-hover-inner flex flex-col transition-transform duration-300 ease-out">
+                            <span>{item.label}</span>
+                            <span>{item.label}</span>
+                          </span>
                         </button>
                       ))}
                     </nav>
@@ -934,8 +949,8 @@ export function App() {
 
             <main className="pb-24 pt-12">
               {!isAiDesignSystem && (
-                <div className="flex flex-col gap-6">
-                  <section className="flex flex-col gap-8 hero-row md:items-start md:justify-start md:gap-16">
+                <div className="flex flex-col gap-12">
+                  <section className="flex flex-col gap-10 hero-row md:items-start md:justify-start md:gap-10">
                   <div className="max-w-xl md:max-w-none md:flex-1">
                     <h1 className="text-[36px] leading-tight tracking-normal text-slate-900 md:text-[48px] xl:text-[52px]">
                       I&apos;m Jiayi, a product designer who <span className="italic">engineers.</span>
@@ -984,10 +999,18 @@ export function App() {
                             href={project.url}
                             target="_blank"
                             rel="noreferrer noopener"
-                            className="flex h-full flex-col"
+                            className="group flex h-full flex-col"
                           >
                             <div className="aspect-[4/3] w-full overflow-hidden bg-slate-100">
-                              {/* 预览媒体：后续可替换成 <video> 或 <img src="..." /> */}
+                              <div className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-125">
+                                {project.url === '/projects/ai-design-system' ? (
+                                  <img
+                                    src={heroImage}
+                                    alt=""
+                                    className="h-full w-full object-cover object-center"
+                                  />
+                                ) : null}
+                              </div>
                             </div>
                             <div className="project-footer flex items-center justify-between px-0 py-4 text-sm text-slate-700 md:px-0 md:py-4">
                               <div className="text-slate-900 project-title">{project.title}</div>
@@ -995,15 +1018,17 @@ export function App() {
                             </div>
                           </a>
                         ) : (
-                          <>
+                          <div className="group">
                             <div className="aspect-[4/3] w-full overflow-hidden bg-slate-100">
-                              {/* 预览媒体：后续可替换成 <video> 或 <img src="..." /> */}
+                              <div className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-125">
+                                {/* 预览媒体：后续可替换成 <video> 或 <img src="..." /> */}
+                              </div>
                             </div>
                             <div className="project-footer flex items-center justify-between px-0 py-4 text-sm text-slate-700 md:px-0 md:py-4">
                               <div className="text-slate-900 project-title">{project.title}</div>
                               <div className="project-meta text-slate-500">{project.meta}</div>
                             </div>
-                          </>
+                          </div>
                         )}
                       </article>
                     ))}

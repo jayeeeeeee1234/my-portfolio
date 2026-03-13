@@ -6,6 +6,16 @@ html {
   scroll-behavior: smooth;
 }
 
+/* 文本选中高亮颜色 */
+::selection {
+  background-color: #f1f8ea;
+  color: #4f6f34;
+}
+::-moz-selection {
+  background-color: #f1f8ea;
+  color: #4f6f34;
+}
+
 /* 自带字体：Lay Grotesk & Mazius & Geist Mono & Tiempos
    实际文件名：
    public/fonts/lay-grotesk/
@@ -221,6 +231,11 @@ a,
 .project-meta {
   font-family: 'Geist Mono', 'Lay Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-size: 14px;
+}
+
+/* 文字 hover 向上滚动效果（SCROLL 按钮 + 导航标签） */
+.roll-hover:hover .roll-hover-inner {
+  transform: translateY(-50%);
 }
 
 .case-index {
