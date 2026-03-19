@@ -158,7 +158,7 @@ function AiDesignSystemContent() {
         {/* 标题区：整块（背景+内容）随滚动上移，仅文字渐隐 */}
         <motion.div
           ref={heroTitleRef}
-          className="relative z-10 w-screen max-w-none ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] bg-white px-6 pt-0 pb-12 md:px-12 md:pt-14 md:pb-14 lg:px-16 lg:pt-20 lg:pb-16 max-h-[33vh] flex flex-col justify-center"
+          className="relative z-10 w-screen max-w-none ml-[calc(50%-50vw)] mr-[calc(50%-50vw)] bg-white px-6 pt-8 pb-14 md:px-12 md:pt-14 md:pb-14 lg:px-16 lg:pt-20 lg:pb-16 max-h-none md:max-h-[33vh] flex flex-col justify-center"
           style={{ y: titleStyle.y }}
           transition={{ duration: 0.42, ease: [0.33, 0, 0.2, 1] }}
         >
@@ -840,7 +840,7 @@ export function App() {
       >
         <div className={chatbotOpen ? 'main-content-col min-w-0 flex-1 md:h-screen md:overflow-y-auto md:scroll-smooth' : ''}>
           <div className="mx-auto w-full max-w-[1800px] px-6">
-            <header className="relative border-b border-slate-100">
+            <header className="relative -mx-6 border-b border-slate-100 px-6">
               <div className="flex items-center justify-between py-4 font-light md:py-5">
                 <a
                   href="/"
@@ -926,18 +926,20 @@ export function App() {
                     transition={{ duration: 0.2, ease: 'easeOut' }}
                     className="absolute inset-x-0 top-full z-30 border-y border-slate-100 bg-white py-4 md:hidden"
                   >
-                    <nav className="flex flex-col gap-1 text-[11px] font-medium uppercase tracking-[0.16em] nav-mono">
+                    <nav className="flex flex-col gap-0 text-[11px] font-medium uppercase tracking-[0.16em] nav-mono">
                       {navItems.map((item) => (
                         <button
                           key={item.label}
                           onClick={() => setMenuOpen(false)}
-                          className={`roll-hover overflow-hidden h-[1.2em] px-3 py-2 text-left ${
+                          className={`roll-hover mobile-nav-roll flex min-h-[44px] w-full items-center px-4 py-3 text-left ${
                             item.active ? 'text-[#4f6f34] hover:text-slate-800' : 'text-slate-500 hover:text-[#4f6f34]'
                           }`}
                         >
-                          <span className="roll-hover-inner flex flex-col transition-transform duration-300 ease-out">
-                            <span>{item.label}</span>
-                            <span>{item.label}</span>
+                          <span className="mobile-nav-roll-clip h-[1.6em] w-full overflow-hidden">
+                            <span className="roll-hover-inner flex flex-col transition-transform duration-300 ease-out">
+                              <span className="flex min-h-[1.6em] items-center leading-[1.6]">{item.label}</span>
+                              <span className="flex min-h-[1.6em] items-center leading-[1.6]">{item.label}</span>
+                            </span>
                           </span>
                         </button>
                       ))}

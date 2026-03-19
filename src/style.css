@@ -161,6 +161,19 @@ a,
   cursor: none;
 }
 
+/* 移动端 / 无悬停设备：恢复系统光标，隐藏自定义光标 */
+@media (max-width: 767px), (hover: none) {
+  body,
+  button,
+  a,
+  [role='button'] {
+    cursor: auto;
+  }
+  .custom-cursor {
+    display: none !important;
+  }
+}
+
 .custom-cursor {
   position: fixed;
   top: 0;
@@ -233,9 +246,11 @@ a,
   font-size: 14px;
 }
 
-/* 文字 hover 向上滚动效果（SCROLL 按钮 + 导航标签） */
-.roll-hover:hover .roll-hover-inner {
-  transform: translateY(-50%);
+/* 文字 hover 向上滚动效果（SCROLL 按钮 + 导航标签），仅在有悬停时生效（桌面） */
+@media (hover: hover) {
+  .roll-hover:hover .roll-hover-inner {
+    transform: translateY(-50%);
+  }
 }
 
 .case-index {
