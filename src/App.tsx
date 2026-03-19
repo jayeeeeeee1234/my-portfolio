@@ -924,7 +924,7 @@ export function App() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.2, ease: 'easeOut' }}
-                    className="absolute inset-x-0 top-full z-30 border-y border-slate-100 bg-white py-4 md:hidden"
+                    className="absolute inset-x-0 top-full z-30 border-y border-slate-100 bg-white px-3 py-4 md:hidden"
                   >
                     <nav className="flex flex-col gap-0 text-[11px] font-medium uppercase tracking-[0.16em] nav-mono">
                       {navItems.map((item) => (
